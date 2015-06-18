@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+# Takes in a file and parses the file for Web, Linux, and Dos formatting
+# Created by Jeremy Winterberg.. with help from Dustin
+
+@html_entities = {
+    "&nbsp;"    => " ",
+    "&lt;"      => "<",
+    "&gt;"      => ">",
+    "&amp;"     => "&",
+    "&cent;"    => "¢",
+    "&pound;"   => "£",
+    "&yen;"     => "¥",
+    "&euro;"    => "€",
+    "&copy;"    => "©",
+    "&reg;"     => "®",
+    "&#147;"    => "“",
+    "&#148;"    => "”",
+    "&#33;"     => "!",
+    "&#34;"     => "\"",
+    "&#35;"     => "#",
+    "&#151;"    => "—",
+    "&#38;"     => "&",
+    "&#64;"     => "@",
+    "&#39;"     => "'"
+}
+
+def helptext
+    puts "Incorrect number of arguments!"
+    puts "Usage: ruby parse <file> [wld]"
+    puts "\t-w Web Format\t- Remove \\r\\n"
+    puts "\t-l Linux Format\t- Remove html tags and \\r and only use \\n"
+    puts "\t-d Dos Format\t- Remove html tags and only use \\r\\n"
+    exit
+end
+
+def html line
+    line.gsub!(/<[^>]*>/, "")
+    line.gsub!(/(&[^;]*;)/) {
+     @html_entities[$1]
+    }
+end
+
+if ARGV.length != 2
+    helptext
+else
+    File.open(File.absolute_path(ARGV[0]), "r") do |f|
+        f.each_line do |line|
+            case ARGV[1]
+            # Web Format - w option
+            when 'w'
+                line.gsub!(/\\r\\n/, "")
+            # Linux Format - l option
+            when 'l'
+                html(line)
+                line.gsub!(/\\r/, "")
+            # Dos Format - d option
+            when 'd'
+                html(line)
+            end
+            print line << ' ' unless line.empty?
+        end
+    end
+end
